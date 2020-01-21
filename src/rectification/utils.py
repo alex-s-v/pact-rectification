@@ -7,7 +7,7 @@ import functools
 from rectification.core import ureg
 
 
-def isunit(value):
+def isunit(value, ureg=ureg):
     """Check if the value is the `pint.Quantity`
 
     Parameters
