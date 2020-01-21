@@ -1,5 +1,5 @@
 """
-Entrypoint module, in case you use `python -mrectification`.
+Entrypoint module, in case you use `python -m rectification`.
 
 
 Why does this file exist, and why __main__? For more info, read:
