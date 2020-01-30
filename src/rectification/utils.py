@@ -153,4 +153,3 @@ def isclose(a, b, atol=1e-3):
             b = b.m
         a = a.m
     return np.isclose(a, b, atol=atol, rtol=0)
-   
