@@ -4,6 +4,8 @@ Module with useful functions and others.
 import inspect
 import functools
 
+import numpy as np
+
 from rectification.core import ureg
 
 
@@ -124,3 +126,31 @@ def unitcheck(res_unit=None, **kwargs):
             return res
         return wrapper
     return decorator
+
+
+def isclose(a, b, atol=1e-3):
+    """
+    Superset of `numpy.isclose` with rtol == 0 and
+    with unit checking.
+    Parameters
+    ----------
+    a, b : array_like
+        Input arrays to compare. Can have units.
+    atol : float, optional
+        The absolute tolerance parameter.
+        Default is 1e-3.
+    Returns
+    -------
+    array_like
+        Return boolean array of where `a` and `b` are equal
+        within the given tolerance. If both parameters have
+        units, units are also checked.
+    """
+    if isunit(a):
+        if isunit(b):
+            if a.u != b.u:
+                return False
+            b = b.m
+        a = a.m
+    return np.isclose(a, b, atol=atol, rtol=0)
+   
