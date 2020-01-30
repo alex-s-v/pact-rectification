@@ -91,7 +91,7 @@ def convparams(f, units, args, kwargs):
     return na, nk
 
 
-def unitcheck(units, res_unit=None):
+def unitcheck(res_unit=None, **kwargs):
     """
     Convinience function to check and convert parameters
     of the function to the desired units.
@@ -100,18 +100,20 @@ def unitcheck(units, res_unit=None):
 
     Parameters
     ----------
-    units : dict[str, str]
-        Dictionary of name - unit pairs, where name is the
-        name of the parameter which should be set or converted to
-        the unit.
     res_unit : str, optional
         If specified will determine units of the output value.
+    **kwargs
+        Name - unit pairs, where name is the
+        name of the parameter which should be set or converted to
+        the unit. Units are specified as strings.
 
     Returns
     -------
     callable
         Wrapper for the function.
     """
+    units = kwargs
+
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
