@@ -73,7 +73,7 @@ def calc_Diffliq(calc_Diffcoef20, b, t_boil):
     b : float
         The temperature coefficient, [dimensionless]
     t_boil : float
-        The temperature of low-boilling component of liquid, [degrees celcium]
+        The boiling temperature of liquid, [degrees celcium]
     Returns
     -------
     calc_Diffliq : float
@@ -264,3 +264,48 @@ def h_bubble(heigth_layer, epsi_vapor):
     Дытнерский, страница 242
     """
     return heigth_layer / (1 - epsi_vapor)
+
+
+def w_oper(rho_mix, rho_vapor):
+    """
+    Calculates the operating speed in column.
+    Parameters
+    ----------
+    rho_mix : float
+        The destiny of mix, [kg/m**3]
+    rho_vapor : float
+        The destiny of vapor, [kg/m**3]
+    Returns
+    -------
+    w_oper : float
+        The operating speed in column. [m]
+    References
+    ----------
+    Дытнерский, страница 205, формула 5.33
+    """
+    return 0.05 * rho_mix**0.5 / rho_vapor**0.5
+
+
+@unitcheck(flate_vapor="kg/s", w_oper="m/s", rho_vapor="kg/m**3", res_unit="m")
+def d_clm(flate_vapor, w_oper, rho_vapor):
+    """
+    Calculates the diameter of column.
+    Parameters
+    ----------
+    flate_vapor : float
+        The mass flow rate of vapor, [kg/s]
+    w_oper : float
+        The operating speed in column, [m]
+    rho_vapor : 
+        The destiny of vapor, [kg/m**3]
+    Returns
+    -------
+    d_clm : float
+        The diameter of column. [m]
+    References
+    ----------
+    Дытнерский, страница 197, формула 5.10
+    """    
+    return (4 * flate_vapor / (np.pi * w_oper * rho_vapor))**0.5
+
+
