@@ -309,3 +309,237 @@ def d_clm(flate_vapor, w_oper, rho_vapor):
     return (4 * flate_vapor / (np.pi * w_oper * rho_vapor))**0.5
 
 
+def xfeed_molar(xfeed_mass, Massl, Massh):
+    """
+    Calculates the molar concetration feed of liquid.
+    Parameters
+    ----------
+    xfeed_mass : float
+        The mass concetration feed of liquid, [kg/kg]
+    Massl : float
+        The molar mass of low-boilling component, [g/mol]
+    Massh : float
+        The molar mass of high-boilling component, [g/mol]
+    Returns
+    -------
+    xfeed_molar : float
+        The molar concetration feed of liquid. [kmol/kmol]
+    References
+    ----------
+    Романков, страница 282, таблица 6.1 / Дытнерский стр.228 формула 6.3
+    """ 
+    return xfeed_mass * Massh / ((xfeed_mass * Massh) + (Massl - Massl * xfeed_mass))
+
+
+def xdist_molar(xdist_mass, Massl, Massh):
+    """
+    Calculates the molar concetration distilliat of liquid.
+    Parameters
+    ----------
+    xdist_mass : float
+        The mass concetration distilliat of liquid, [kg/kg]
+    Massl : float
+        The molar mass of low-boilling component, [g/mol]
+    Massh : float
+        The molar mass of high-boilling component, [g/mol]
+    Returns
+    -------
+    xdist_molar : float
+        The molar concetration distilliat of liquid. [kmol/kmol]
+    References
+    ----------
+    Романков, страница 282, таблица 6.1 / Дытнерский стр.228 формула 6.3
+    """ 
+    return xdist_mass * Massh / ((xdist_mass * Massh) + (Massl - Massl * xdist_mass))
+
+
+def xwaste_molar(xwaste_mass, Massl, Massh):
+    """
+    Calculates the molar concetration waste of liquid.
+    Parameters
+    ----------
+    xwaste_mass : float
+        The mass concetration waste of liquid, [kg/kg]
+    Massl : float
+        The molar mass of low-boilling component, [g/mol]
+    Massh : float
+        The molar mass of high-boilling component, [g/mol]
+    Returns
+    -------
+    xwaste_molar : float
+        The molar concetration waste of liquid. [kmol/kmol]
+    References
+    ----------
+    Романков, страница 282, таблица 6.1 / Дытнерский стр.228 формула 6.3
+    """ 
+    return xwaste_mass * Massh / ((xwaste_mass * Massh) + (Massl - Massl * xwaste_mass))
+
+
+def M_feed(xfeed_molar, Massh, Massl):
+    """
+    Calculates the molar mass feed of liquid.
+    Parameters
+    ----------
+    xfeed_molar : float
+        The molar concetration feed of liquid. [kmol/kmol]
+    Massl : float
+        The molar mass of low-boilling component, [g/mol]
+    Massh : float
+        The molar mass of high-boilling component, [g/mol]
+    Returns
+    -------
+    M_feed : float
+        The molar mass feed of liquid. [kg/kmol]
+    References
+    ----------
+    Дытнерский, стр. 230, формула 6.6
+    """ 
+    return xfeed_molar * Massl + Massh - Massh * xfeed_molar
+
+
+def M_dist(xdist_molar, Massh, Massl):
+    """
+    Calculates the molar mass distilliat of liquid.
+    Parameters
+    ----------
+    xdist_molar : float
+        The molar concetration distilliat of liquid. [kmol/kmol]
+    Massl : float
+        The molar mass of low-boilling component, [g/mol]
+    Massh : float
+        The molar mass of high-boilling component, [g/mol]
+    Returns
+    -------
+    M_dist : float
+        The molar mass distilliat of liquid. [kg/kmol]
+    References
+    ----------
+    Дытнерский, стр. 230, формула 6.6
+    """ 
+    return xdist_molar * Massl + Massh - Massh * xdist_molar
+
+
+def M_waste(xwaste_molar, Massh, Massl):
+    """
+    Calculates the molar mass waste of liquid.
+    Parameters
+    ----------
+    xwaste_molar : float
+        The molar concetration waste of liquid. [kmol/kmol]
+    Massl : float
+        The molar mass of low-boilling component, [g/mol]
+    Massh : float
+        The molar mass of high-boilling component, [g/mol]
+    Returns
+    -------
+    M_waste : float
+        The molar mass waste of liquid. [kg/kmol]
+    References
+    ----------
+    Дытнерский, стр. 230, формула 6.6
+    """ 
+    return xwaste_molar * Massl + Massh - Massh * xwaste_molar
+
+
+def W_mass(F_mass, xdist_mass, xfeed_mass, xwaste_mass):
+    """
+    Calculates the mass flow rate of waste.
+    Parameters
+    ----------
+    F_mass : float
+        The mass flow rate of feed [kg/s]
+    xdist_mass : float
+        The mass concetration distilliat of liquid, [kg/kg]
+    xwaste_mass : float
+        The mass concetration waste of liquid, [kg/kg]
+    xfeed_mass : float
+        The mass concetration feed of liquid, [kg/kg]
+    Returns
+    -------
+    W_mass : float
+        The mass flow rate of waste. [kg/s]
+    References
+    ----------
+    Дытнерский, стр. 228, формула 6.1
+    """ 
+    return F_mass * (xdist_mass - xfeed_mass) / (xdist_mass - xwaste_mass)
+
+
+def P_mass(F_mass, W_mass):
+    """
+    Calculates the mass flow rate of distilliat.
+    Parameters
+    ----------
+    F_mass : float
+        The mass flow rate of feed [kg/s]
+    W_mass : float
+        The mass flow rate of waste. [kg/s]
+    Returns
+    -------
+    P_mass : float
+        The mass flow rate of distilliat. [kg/s]
+    References
+    ----------
+    Дытнерский, стр. 228, формула 6.1
+    """    
+    return F_mass - W_mass
+
+
+def F_mol(F_mass, M_feed):
+    """
+    Calculates the molar flow rate of feed.
+    Parameters
+    ----------
+    F_mass : float
+        The mass flow rate of feed [kg/s]
+    M_feed : float
+        The molar mass feed of liquid. [kg/kmol]
+    Returns
+    -------
+    F_mol : float
+        The molar flow rate of feed, [kmol/s]
+    References
+    ----------
+    ???
+    """        
+    return F_mass / M_feed
+
+
+def P_mol(P_mass, M_dist):
+    """
+    Calculates the molar flow rate of dist.
+    Parameters
+    ----------
+    P_mass : float
+        The mass flow rate of distilliat, [kg/s]
+    M_dist : float
+        The molar mass  of distilliat, [kg/kmol]
+    Returns
+    -------
+    P_mol : float
+        The molar flow rate of distilliat, [kmol/s]
+    References
+    ----------
+    ???
+    """        
+    return P_mass / M_dist
+
+
+def W_mol(W_mass, M_waste):
+    """
+    Calculates the molar flow rate of waste.
+    Parameters
+    ----------
+    P_mass : float
+        The mass flow rate of waste, [kg/s]
+    M_waste : float
+        The molar mass  of waste, [kg/kmol]
+    Returns
+    -------
+    P_mol : float
+        The molar flow rate of waste, [kmol/s]
+    References
+    ----------
+    ???
+    """        
+    return W_mass / M_waste
