@@ -8,12 +8,12 @@ def operating_line(x, R, xp):
 
 
 @unitcheck(L="kg/s", rhol="kg/m**3", Ft="m**2", res_unit="m**3/(m**2*s)")
-def calc_Ucoef(L, rhol, Ft):
+def U_coef(L, rhol, Ft):
     return L / (rhol * Ft)
 
 
 @unitcheck(Massl="g/mol", Massh="g/mol", mu_solv="Pa*s", nul="sm**3/mol", nuh="sm**3/mol", res_unit="m**2/s")
-def calc_Diffcoef20(Massl, Massh, A , B, mu_solv, nul, nuh):
+def Diff_20(Massl, Massh, A , B, mu_solv, nul, nuh):
     """
     Calculates the diffusion coefficient at 20 degrees celcium.
     Parameters
@@ -34,7 +34,7 @@ def calc_Diffcoef20(Massl, Massh, A , B, mu_solv, nul, nuh):
         The molar volume of solvent, [sm**3/s]
     Returns
     -------
-    calc_Diffcoef20 : float
+    Diff_20 : float
         The diffusion coefficient at 20 degrees celcium, [m**2/s]
     References
     ----------
@@ -63,7 +63,7 @@ def b(mul_20, rhol_20):
     return mul_20**0.5/rhol_20**0.66
 
 
-def calc_Diffliq(calc_Diffcoef20, b, t_boil):
+def Diff_liq(Diff_20, b, t_boil):
     """
     Calculates the diffusion coefficient of liquid phaze.
     Parameters
@@ -76,17 +76,17 @@ def calc_Diffliq(calc_Diffcoef20, b, t_boil):
         The boiling temperature of liquid, [degrees celcium]
     Returns
     -------
-    calc_Diffliq : float
+    Diff_liq : float
         The diffusion coefficient of liquid phaze.
     References
     ----------
     Романков, страница 289, формула 6.23
     """
-    return calc_Diffcoef20 * (1 + b * (t_boil - 20))
+    return Diff_20 * (1 + b * (t_boil - 20))
 
 
 @unitcheck(t_boil="K", Massl="g/mol", Massh="g/mol", P_abs="Pa", nul="sm**3/mol", nuh="sm**3/mol", res_unit="m**2/s")
-def calc_Diffvapor(t_boil, P_abs, Massl, Massh, nul, nuh):
+def Diff_vapor(t_boil, P_abs, Massl, Massh, nul, nuh):
     """
     Calculates the diffusion coefficient of vapor.
     Parameters
@@ -105,7 +105,7 @@ def calc_Diffvapor(t_boil, P_abs, Massl, Massh, nul, nuh):
         The molar volume of solvent, [sm**3/s]
     Returns
     -------
-    calc_Diffvapor : float
+    Diff_vapor : float
         The diffusion coefficient of vapor, [m**2/s]
     References
     ----------
@@ -543,3 +543,59 @@ def W_mol(W_mass, M_waste):
     ???
     """        
     return W_mass / M_waste
+
+
+def beta_liq(Diff_liq, epsi_vapor, U_coef, heigth_layer, mu_vapor, mu_mix):
+    """
+    Calculates the coefficient masstransfer of liquid.
+    Parameters
+    ----------
+    Diff_liq : float
+        The diffusion coefficient of liquid phaze.
+    epsi_vapor : float
+        The vapor content of bubble layer, [dimensionless]
+    heigth_layer : float
+        The heigth ligth layer of  the liquid, [m]
+    mu_mix : float
+        The mix viscocity of liquid, [Pa/s]
+    mu_vapor : float
+        The mix viscocity of vapor, [Pa/s]
+    U_coef : float
+        The specific coefficient for beta_liq equation.
+    Returns
+    -------
+    beta_liq : float
+        The coefficient masstransfer of liquid, [m/s]
+    References
+    ----------
+    Дытнерский, формула 6.37, стр.239
+    """              
+    return 6.24e+5 * (Diff_liq**0.5) * heigth_layer * ((U_coef/(1-epsi_vapor))**0.5) * (mu_vapor / (mu_vapor + mu_mix))**0.5
+
+
+def beta_vapor(Diff_vapor, w_oper, epsi_vapor, heigth_layer, Fc, mu_vapor, mu_mix):
+    """
+    Calculates the coefficient masstransfer of vapor.
+    Parameters
+    ----------
+    Diff_vapor : float
+        The diffusion coefficient of vapor phaze, []
+    epsi_vapor : float
+        The vapor content of bubble layer, [dimensionless]
+    heigth_layer : float
+        The heigth ligth layer of  the liquid, [m]
+    mu_mix : float
+        The mix viscocity of liquid, [Pa/s]
+    mu_vapor : float
+        The mix viscocity of vapor, [Pa/s]
+    Fc : float
+        The free section of a plate, [dimensionless]
+    Returns
+    -------
+    beta_vapor : float
+        The coefficient masstransfer of vapor, [m/s]
+    References
+    ----------
+    Дытнерский, формула 6.38, стр.239
+    """
+    return 6.24e+5 * Diff_vapor**0.5 * ((w_oper/epsi_vapor)**0.5) * heigth_layer * Fc * ((mu_vapor / (mu_vapor + mu_mix))**0.5)
