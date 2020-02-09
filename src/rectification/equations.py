@@ -599,3 +599,135 @@ def beta_vapor(Diff_vapor, w_oper, epsi_vapor, heigth_layer, Fc, mu_vapor, mu_mi
     Дытнерский, формула 6.38, стр.239
     """
     return 6.24e+5 * Diff_vapor**0.5 * ((w_oper/epsi_vapor)**0.5) * heigth_layer * Fc * ((mu_vapor / (mu_vapor + mu_mix))**0.5)
+
+
+def deltaT_diff(deltaT_larger, deltaT_less):
+    """
+    Calculates the difference of temperatures.
+    Parameters
+    ----------
+    deltaT_larger : float
+        The difference temperatures between the temperature of vapor and the lowest temperature of liquid , [degrees celcium]
+    deltaT_less : float
+        The difference temperatures between the temperature of vapor and the biggest temperature of liquid , [degrees celcium]
+    Returns
+    -------
+    deltaT_diff : float
+        The coefficient difference of temperatures, [degrees celcium]
+    References
+    ----------
+    Романков, формула 4.78, стр.169
+    """   
+    if deltaT_larger/deltaT_less < 2:
+        return (deltaT_larger + deltaT_less) / 2
+    if deltaT_larger/deltaT_less > 2:
+        return (deltaT_larger - deltaT_less) / np.log(deltaT_larger / deltaT_less)
+
+
+def deltaT_larger(t_vapor, tinit_mix):
+    """
+    Calculates the difference temperatures between the temperature of vapor and the lowest temperature of liquid.
+    Parameters
+    ----------
+    t_vapor : float
+        The temperature of vapor, [degrees celcium]
+    tinit_mix : float
+        The initial temperature of mix, [degrees celcium]
+    Returns
+    -------
+    deltaT_larger : float
+        The difference temperatures between the temperature of vapor and the lowest temperature of liquid , [degrees celcium]
+    References
+    ----------
+    Романков, формула 4.78, стр.169
+    """       
+    return t_vapor - tinit_mix
+
+
+def deltaT_less(t_vapor, tboil_mix):
+    """
+    Calculates the difference temperatures between the temperature of vapor and the lowest temperature of liquid.
+    Parameters
+    ----------
+    t_vapor : float
+        The temperature of vapor, [degrees celcium]
+    tboil_mix : float
+        The boilling temperature of mix, [degrees celcium]
+    Returns
+    -------
+    deltaT_less : float
+        The difference temperatures between the temperature of vapor and the biggest temperature of liquid, [degrees celcium]
+    References
+    ----------
+    Романков, формула 4.78, стр.169
+    """       
+    return t_vapor - tboil_mix
+
+
+def Q_heatload(deltaT, F_mass, Cp, phi_vapor, Feed_vaporazation):
+    """
+    Calculates the heat load of heat exchanger.
+    Parameters
+    ----------
+    deltaT : float
+        The difference temperatures between the initial and the ultimate temperatures of mix , [degrees celcium]
+    F_mass : float
+        The mass flow rate of feed [kg/s]
+    Cp : float
+        The heat capacity of mix [J/(kg * degrees C)]
+    phi_vapor: float
+        The part of vapor in feed, [dimensionless]
+    Feed_vaporazation : float
+        The heat vaporazation of mix, [J/kg]
+    Returns
+    -------
+    Q_heatload : float
+        The heat load of heat exchanger, [W] , [J/s]
+    References
+    ----------
+    Дытнерский, формула 2.2, стр.45
+    """   
+    return F_mass * (Cp * deltaT + phi_vapor * Feed_vaporazation)
+
+
+def deltaT(tinit_mix, tboil_mix):
+    """
+    Calculates the difference temperatures between the initial and the ultimate temperatures of mix , [degrees celcium]
+    Parameters
+    ----------
+    tinit_mix : float
+        The initial temperature of mix, [degrees celcium]
+    tboil_mix : float
+        The boilling temperature of mix, [degrees celcium]
+    Returns
+    -------
+    deltaT : float
+        The difference temperatures between the initial and the ultimate temperatures of mix , [degrees celcium]
+    References
+    ----------
+    Дытнерский, формула 2.2, стр.45
+    """       
+    return tinit_mix - tboil_mix
+
+
+def A_approx(Q_heatload, deltaT_diff, Kt_approx):
+    """
+    Calculates the approximate heatransfer area.
+    Parameters
+    ----------
+    Q_heatload : float
+        The heat load of heat exchanger, [W] , [J/s]
+    deltaT_diff : float
+        The coefficient difference of temperatures, [degrees celcium]
+    Kt_approx : float
+        The heatransfer coefficient [W/(m**2 * degrees celcium)]
+    Returns
+    -------
+    A_approx : float
+        The approximate heatransfer area, [m**2]
+    References
+    ----------
+    Романков, формула 4.72, стр.168
+    """           
+    return Q_heatload / (deltaT_diff * Kt_approx)
+
