@@ -309,6 +309,7 @@ def d_clm(flate_vapor, w_oper, rho_vapor):
     return (4 * flate_vapor / (np.pi * w_oper * rho_vapor))**0.5
 
 
+@unitcheck(xfeed_mass="kg/kg", Massl="kg/kmol", Massh="kg/kmol", res_unit="kmol/kmol")
 def xfeed_molar(xfeed_mass, Massl, Massh):
     """
     Calculates the molar concetration feed of liquid.
@@ -317,9 +318,9 @@ def xfeed_molar(xfeed_mass, Massl, Massh):
     xfeed_mass : float
         The mass concetration feed of liquid, [kg/kg]
     Massl : float
-        The molar mass of low-boilling component, [g/mol]
+        The molar mass of low-boilling component, [kg/kmol]
     Massh : float
-        The molar mass of high-boilling component, [g/mol]
+        The molar mass of high-boilling component, [kg/kmol]
     Returns
     -------
     xfeed_molar : float
@@ -331,6 +332,7 @@ def xfeed_molar(xfeed_mass, Massl, Massh):
     return xfeed_mass * Massh / ((xfeed_mass * Massh) + (Massl - Massl * xfeed_mass))
 
 
+@unitcheck(xdist_mass="kg/kg", Massl="kg/kmol", Massh="kg/kmol", res_unit="kmol/kmol")
 def xdist_molar(xdist_mass, Massl, Massh):
     """
     Calculates the molar concetration distilliat of liquid.
@@ -339,9 +341,9 @@ def xdist_molar(xdist_mass, Massl, Massh):
     xdist_mass : float
         The mass concetration distilliat of liquid, [kg/kg]
     Massl : float
-        The molar mass of low-boilling component, [g/mol]
+        The molar mass of low-boilling component, [kg/kmol]
     Massh : float
-        The molar mass of high-boilling component, [g/mol]
+        The molar mass of high-boilling component, [kg/kmol]
     Returns
     -------
     xdist_molar : float
@@ -353,6 +355,7 @@ def xdist_molar(xdist_mass, Massl, Massh):
     return xdist_mass * Massh / ((xdist_mass * Massh) + (Massl - Massl * xdist_mass))
 
 
+@unitcheck(xwaste_mass="kg/kg", Massl="kg/kmol", Massh="kg/kmol", res_unit="kmol/kmol")
 def xwaste_molar(xwaste_mass, Massl, Massh):
     """
     Calculates the molar concetration waste of liquid.
@@ -361,9 +364,9 @@ def xwaste_molar(xwaste_mass, Massl, Massh):
     xwaste_mass : float
         The mass concetration waste of liquid, [kg/kg]
     Massl : float
-        The molar mass of low-boilling component, [g/mol]
+        The molar mass of low-boilling component, [kg/kmol]
     Massh : float
-        The molar mass of high-boilling component, [g/mol]
+        The molar mass of high-boilling component, [kg/kmol]
     Returns
     -------
     xwaste_molar : float
@@ -375,6 +378,7 @@ def xwaste_molar(xwaste_mass, Massl, Massh):
     return xwaste_mass * Massh / ((xwaste_mass * Massh) + (Massl - Massl * xwaste_mass))
 
 
+@unitcheck(x_mass="kg/kg", Massl="kg/kmol", Massh="kg/kmol", res_unit="kmol/kmol")
 def M_feed(xfeed_molar, Massh, Massl):
     """
     Calculates the molar mass feed of liquid.
@@ -397,6 +401,7 @@ def M_feed(xfeed_molar, Massh, Massl):
     return xfeed_molar * Massl + Massh - Massh * xfeed_molar
 
 
+@unitcheck(xdist_molar="kg/kg", Massl="kg/kmol", Massh="kg/kmol", res_unit="kg/kmol")
 def M_dist(xdist_molar, Massh, Massl):
     """
     Calculates the molar mass distilliat of liquid.
@@ -405,9 +410,9 @@ def M_dist(xdist_molar, Massh, Massl):
     xdist_molar : float
         The molar concetration distilliat of liquid. [kmol/kmol]
     Massl : float
-        The molar mass of low-boilling component, [g/mol]
+        The molar mass of low-boilling component, [kg/mol]
     Massh : float
-        The molar mass of high-boilling component, [g/mol]
+        The molar mass of high-boilling component, [kg/mol]
     Returns
     -------
     M_dist : float
@@ -419,6 +424,7 @@ def M_dist(xdist_molar, Massh, Massl):
     return xdist_molar * Massl + Massh - Massh * xdist_molar
 
 
+@unitcheck(xwaste_molar="kg/kg", Massl="kg/kmol", Massh="kg/kmol", res_unit="kg/kmol")
 def M_waste(xwaste_molar, Massh, Massl):
     """
     Calculates the molar mass waste of liquid.
@@ -427,9 +433,9 @@ def M_waste(xwaste_molar, Massh, Massl):
     xwaste_molar : float
         The molar concetration waste of liquid. [kmol/kmol]
     Massl : float
-        The molar mass of low-boilling component, [g/mol]
+        The molar mass of low-boilling component, [kg/kmol]
     Massh : float
-        The molar mass of high-boilling component, [g/mol]
+        The molar mass of high-boilling component, [kg/kmol]
     Returns
     -------
     M_waste : float
@@ -441,6 +447,7 @@ def M_waste(xwaste_molar, Massh, Massl):
     return xwaste_molar * Massl + Massh - Massh * xwaste_molar
 
 
+@unitcheck(F_mass="kg/s", xdist_mass="kg/kg", xfeed_mass="kg/kg", x_waste="kg/kg", res_unit="kg/s")
 def W_mass(F_mass, xdist_mass, xfeed_mass, xwaste_mass):
     """
     Calculates the mass flow rate of waste.
@@ -465,6 +472,7 @@ def W_mass(F_mass, xdist_mass, xfeed_mass, xwaste_mass):
     return F_mass * (xdist_mass - xfeed_mass) / (xdist_mass - xwaste_mass)
 
 
+@unitcheck(F_mass="kg/s", W_mass="kg/s", res_unit="kg/s")
 def P_mass(F_mass, W_mass):
     """
     Calculates the mass flow rate of distilliat.
@@ -485,6 +493,7 @@ def P_mass(F_mass, W_mass):
     return F_mass - W_mass
 
 
+@unitcheck(F_mass="kg/s", M_feed="kg/kmol", res_unit="kmol/s")
 def F_mol(F_mass, M_feed):
     """
     Calculates the molar flow rate of feed.
@@ -505,6 +514,7 @@ def F_mol(F_mass, M_feed):
     return F_mass / M_feed
 
 
+@unitcheck(P_mass="kg/s", M_dist="kg/kmol", res_unit="kmol/s")
 def P_mol(P_mass, M_dist):
     """
     Calculates the molar flow rate of dist.
@@ -525,6 +535,7 @@ def P_mol(P_mass, M_dist):
     return P_mass / M_dist
 
 
+@unitcheck(W_mass="kg/s", M_waste="kg/kmol", res_unit="kmol/s")
 def W_mol(W_mass, M_waste):
     """
     Calculates the molar flow rate of waste.
@@ -545,6 +556,7 @@ def W_mol(W_mass, M_waste):
     return W_mass / M_waste
 
 
+@unitcheck(F_mass="kg/s", Ь_ауув="kg/kmol", res_unit="kg/s")
 def beta_liq(Diff_liq, epsi_vapor, U_coef, heigth_layer, mu_vapor, mu_mix):
     """
     Calculates the coefficient masstransfer of liquid.
@@ -664,6 +676,7 @@ def deltaT_less(t_vapor, tboil_mix):
     return t_vapor - tboil_mix
 
 
+@unitcheck(deltaT="degrees celcium", F_mass="kg/s", Cp="J/(kg * degrees celcium", res_unit="W")
 def Q_heatload(deltaT, F_mass, Cp, phi_vapor, Feed_vaporazation):
     """
     Calculates the heat load of heat exchanger.
@@ -710,6 +723,7 @@ def deltaT(tinit_mix, tboil_mix):
     return tinit_mix - tboil_mix
 
 
+@unitcheck(Q_heatload="W", deltaT_diff="degrees celcium",  Kt_approx="W/(m**2 * degrees celcium", res_unit="m**2")
 def A_approx(Q_heatload, deltaT_diff, Kt_approx):
     """
     Calculates the approximate heatransfer area.
