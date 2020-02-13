@@ -152,4 +152,7 @@ def isclose(a, b, atol=1e-3):
                 return False
             b = b.m
         a = a.m
+    else:
+        if isunit(b):
+            b = b.m
     return np.isclose(a, b, atol=atol, rtol=0)
