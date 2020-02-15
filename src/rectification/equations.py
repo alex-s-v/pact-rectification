@@ -541,7 +541,7 @@ def W_mol(W_mass, M_waste):
     Calculates the molar flow rate of waste.
     Parameters
     ----------
-    P_mass : float
+    W_mass : float
         The mass flow rate of waste, [kg/s]
     M_waste : float
         The molar mass  of waste, [kg/kmol]
@@ -613,6 +613,7 @@ def beta_vapor(Diff_vapor, w_oper, epsi_vapor, heigth_layer, Fc, mu_vapor, mu_mi
     return 6.24e+5 * Diff_vapor**0.5 * ((w_oper/epsi_vapor)**0.5) * heigth_layer * Fc * ((mu_vapor / (mu_vapor + mu_mix))**0.5)
 
 
+#equations for feed mix heatexchanger.
 def deltaT_diff(deltaT_larger, deltaT_less):
     """
     Calculates the difference of temperatures.
@@ -677,7 +678,7 @@ def deltaT_less(t_vapor, tboil_mix):
 
 
 @unitcheck(deltaT="degrees celcium", F_mass="kg/s", Cp="J/(kg * degrees celcium", res_unit="W")
-def Q_heatload(deltaT, F_mass, Cp, phi_vapor, Feed_vaporazation):
+def Qload_feed(deltaT, F_mass, Cp, phi_vapor, Feed_vaporazation):
     """
     Calculates the heat load of heat exchanger.
     Parameters
@@ -694,7 +695,7 @@ def Q_heatload(deltaT, F_mass, Cp, phi_vapor, Feed_vaporazation):
         The heat vaporazation of mix, [J/kg]
     Returns
     -------
-    Q_heatload : float
+    Qload_feed : float
         The heat load of heat exchanger, [W] , [J/s]
     References
     ----------
@@ -723,13 +724,13 @@ def deltaT(tinit_mix, tboil_mix):
     return tinit_mix - tboil_mix
 
 
-@unitcheck(Q_heatload="W", deltaT_diff="degrees celcium",  Kt_approx="W/(m**2 * degrees celcium", res_unit="m**2")
-def A_approx(Q_heatload, deltaT_diff, Kt_approx):
+@unitcheck(Qload_feed="W", deltaT_diff="degrees celcium",  Kt_approx="W/(m**2 * degrees celcium", res_unit="m**2")
+def A_approx(Qload_feed, deltaT_diff, Kt_approx):
     """
     Calculates the approximate heatransfer area.
     Parameters
     ----------
-    Q_heatload : float
+    Qload_feed : float
         The heat load of heat exchanger, [W] , [J/s]
     deltaT_diff : float
         The coefficient difference of temperatures, [degrees celcium]
@@ -743,5 +744,293 @@ def A_approx(Q_heatload, deltaT_diff, Kt_approx):
     ----------
     Романков, формула 4.72, стр.168
     """           
-    return Q_heatload / (deltaT_diff * Kt_approx)
+    return Qload_feed / (deltaT_diff * Kt_approx)
+
+
+def flatesteam_feed(Qload_feed, vaporazation_steam):
+    """
+    Calculates the flow rate steam of boiler.
+    Parameters
+    ----------
+    Qload_feed : float
+        The heat load feed of heat exchanger, [W] [J/s]
+    vaporazation_steam : float
+        The heat vaporazation of dist [J/kg]
+    Returns
+    -------
+    flatesteam_feed : float
+        The flow rate steam of feed heat exchanger, [W] [J/s]
+    References
+    ----------
+    Дытнерский, формула 2.3, стр.45
+    """               
+    return Qload_feed / vaporazation_steam
+    
+
+def Re(F_mass, z_way, d_inner, n_pipe, mu_mix):
+    """
+    Calculates the Reynold criterion.
+    Parameters
+    ----------
+    F_mass : float
+        The mass flow rate of feed [kg/s]
+    z_way : float
+        The number of ways in heat exchanger [dimensionless]
+    d_inner : float
+        The diametr of inner pipe, [m]
+    n_pipe : float
+        The number of pipes in heat exchanger, [dimensionless]
+    mu_mix : float
+        The mix viscocity of liquid, [Pa/s]
+    Returns
+    -------
+    Re : float
+        The Reynold criterion, [dimensionless]
+    References
+    ----------
+    &&&&&&
+    """         
+    return 0.785 * F_mass * z_way / (d_inner * n_pipe * mu_mix)
+
+
+def Pr(C_capacity, mu_mix, lyambda_feed):
+    """
+    Calculates the Prandtl criterion.
+    Parameters
+    ----------
+    C_capacity : float
+        The heat capacity of mix [J/(kg * degrees celcium)]
+    mu_mix : float
+        The mix viscocity of liquid, [Pa/s]
+    lyambda_feed : float
+        The thermal conductivity of feed, [W / (m * degreec celcium)]
+    Returns
+    -------
+    Pr : float
+        The Prandtl criterion, [dimensionless]
+    References
+    ----------
+    Романков, формула 4.12, стр.151
+    """        
+    return C_capacity * mu_mix / lyambda_feed
+
+
+def Nu(Re, Pr):
+    """
+    Calculates the Nusselt criterion.
+    Parameters
+    ----------
+    Re : float
+        The Reynold criterion, [dimensionless]
+    Pr : float
+        The Prandtl criterion, [dimensionless]
+    Returns
+    -------
+    Nu : float
+        The Nusselt criterion, [dimensionless]
+    References
+    ----------
+    Романков, формула 4.17, стр.152
+    """      
+    return 0.021 * (Re**0.8) * (Pr**0.4)
+
+
+def alpha_liq(Nu, lyambda_feed, d_inner):
+    """
+    Calculates the coefficent of heat transfer(alpha) from liquid to wall of pipe.
+    Parameters
+    ----------
+    Nu : float
+        The Nusselt criterion, [dimensionless]
+    lyambda_feed : float
+        The thermal conductivity of feed, [W / (m * degreec celcium)]
+    d_inner : float
+        The diametr of inner pipe, [m]
+    Returns
+    -------
+    alpha_liq : float
+        The coefficent of heat transfer(alpha), [W / (m**2 * degrees celcium)]
+    References
+    ----------
+    Романков, формула 4.11, стр.150
+    """          
+    return Nu * lyambda_feed / d_inner
+
+
+def alpha_vap(lyambda_cond, rho_cond, mu_cond, flatesteam_feed, n_pipe, d_outside):
+    """
+    Calculates the coefficent of heat transfer(alpha) from steam to wall of pipe.
+    Parameters
+    ----------
+    lyambda_cond : float
+        The thermal conducivity of condensate, [W / (m * degrees celcium)]
+    rho_cond : float
+        The destiny of condensate, [kg / m**3]
+    mu_cond : float
+        The viscosity of condensate, [Pa / s]
+    flatesteam_feed : float
+        The flow rate steam of feed heat exchanger, [W] [J/s]
+    n_pipe : float
+        The number of pipes in heat exchanger, [dimensionless]
+    d_outside : float
+        The outside diameter of pipe, [m]    
+    Returns
+    -------
+    alpha_vap : float
+        The coefficent of heat transfer(alpha) from steam to wall of pipe, [W / (m**2 * degrees celcium)]
+    References
+    ----------
+    Дытнерский, формула 2.24, стр.53
+    """              
+    return lyambda_cond * 3.78 * ((rho_cond**2)* n_pipe * d_outside / (mu_cond * flatesteam_feed))**(1/3)
+
+
+def sigma_thermpollution(pollution_1, pollution_2, sigma, lyambda_wall):
+    """
+    Calculates the sum of thermal pollutions.
+    Parameters
+    ----------
+    pollution_1 : float
+        The thermal pollution of the first coolant, [m**2 * degrees celcium / W]
+    pollution_2 : float
+        The thermal pollution of the second coolant, [m**2 * degrees celcium / W]
+    sigma : float
+        The thickness of pipe wall, [m]
+    lyambda_wall : float
+        The thermal conducivity of wall, [W / (m * degrees celcium)]  
+    Returns
+    -------
+    sigma_thermpollution : float
+        The the sum of thermal pollutions, [m**2 * degrees celcium / W]
+    References
+    ----------
+    &&&&&
+    """                  
+    return (sigma / lyambda_wall) + (1 / pollution_1) + (1 / pollution_2)
+
+
+def Kt_real(alpha_liq, alpha_vap, sigma_thermpollution):
+    """
+    Calculates the coefficient of heat transfer (Kt).
+    Parameters
+    ----------
+    alpha_liq : float
+        The coefficent of heat transfer(alpha), [W / (m**2 * degrees celcium)]
+    alpha_vap : float
+        The coefficent of heat transfer(alpha) from steam to wall of pipe, [W / (m**2 * degrees celcium)]
+    sigma_thermpollution : float
+        The the sum of thermal pollutions, [m**2 * degrees celcium / W]  
+    Returns
+    -------
+    Kt_real : float
+        The coefficient of heat transfer (Kt), [W / (m**2 * degrees celcium)]
+    References
+    ----------
+    Романков, формула 4.74, стр. 168
+    """      
+    return ((1 / alpha_liq) + (1 / alpha_vap) + (sigma_thermpollution))**-1
+
+@unitcheck(Qload_feed="W", deltaT_diff="degrees celcium",  Kt_approx="W/(m**2 * degrees celcium", res_unit="m**2")
+def A_real(Qload_feed, Kt_real, deltaT_diff):
+    """
+    Calculates the real heatransfer area.
+    Parameters
+    ----------
+    Qload_feed : float
+        The heat load of heat exchanger, [W] , [J/s]
+    deltaT_diff : float
+        The coefficient difference of temperatures, [degrees celcium]
+    Kt_real : float
+        The heat ransfer coefficient [W/(m**2 * degrees celcium)]
+    Returns
+    -------
+    A_real : float
+        The real heat ransfer area, [m**2]
+    References
+    ----------
+    Романков, формула 4.72, стр.168
+    """      
+    return Qload_feed / (Kt_real * deltaT_diff)
+
+
+def surface_margin (A_approx, A_real):
+    """
+    Calculates the surface margin.
+    Parameters
+    ----------
+    A_approximate : float
+        The approximate heat ransfer area, [m**2]
+    A_real : float
+        The real heat transfer area, [m**2]
+    Returns
+    -------
+    surface_margin : float
+        The surface margin [%]
+    References
+    ----------
+    &&&&
+    """          
+    return (A_approx - A_real) * 100 / A_approx
+
+
+#def for boiler
+def Qload_boiler(W_mass, Cw, tw, P_mass, R, dist_vaporazation, F_mass, Cf, tf, Cp, tp, Q_loss):
+    """
+    Calculates the heat load of boiler.
+    Parameters
+    ----------
+    W_mass : float
+        The mass flow rate of waste, [kg/s]
+    Cw : float
+        The heat capacity of waste [J/(kg * degrees C)]
+    tw : float
+        The boiling temperature of waste [degrees celcium]
+    P_mass : float
+        The mass flow rate of waste, [kg/s]
+    R : float
+        The number of reflux [dimensionless]
+    dist_vaporazition : float
+        The heat vaporazation of dist [J/kg]
+    F_mass : float
+        The mass flow rate of feed, [kg/s]
+    Cf : float
+        The heat capacity of feed, [J/(kg * degrees C)]
+    tf : float
+        The boiling temperature of feed, [degrees celcium]    
+    Cp : float
+        The heat capacity of mix [J/(kg * degrees C)]
+    tp : float
+        The boiling temperature of dist, [degrees celcium]     
+    Q_loss : float
+        The heat loss, [W] [J/s]
+    Returns
+    -------
+    Qload_boiler : float
+        The heat load of boiler, [W] [J/s]
+    References
+    ----------
+    14.	Дытнерский Ю.И. Процессы и аппараты химической технологии. Учебник для вузов. Часть 2. стр 123-124
+    """     
+    return W_mass * Cw * tw + P_mass * (R + 1) * dist_vaporazation - F_mass * Cf * tf + P_mass * Cp * tp + Q_loss
+
+
+def flatesteam_boil(Qload_boiler, vaporazation_steam):
+    """
+    Calculates the flow rate steam of boiler.
+    Parameters
+    ----------
+    Qload_boiler : float
+        The heat load of boiler, [W] [J/s]
+    vaporazation_steam : float
+        The heat vaporazation of dist [J/kg]
+    Returns
+    -------
+    flatesteam_boil : float
+        The flow rate steam of boiler, [W] [J/s]
+    References
+    ----------
+    Дытнерский, формула 2.3, стр.45
+    """               
+    return Qload_boiler / vaporazation_steam
+
 
