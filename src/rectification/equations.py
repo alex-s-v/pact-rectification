@@ -1446,3 +1446,94 @@ def surface_margin_deph (A_approx_deph, A_real_deph):
     """          
     return (A_approx_deph - A_real_deph) * 100 / A_approx_deph
 #endregion
+
+#region Calculating of pump for Feed
+def flate_pump_feed(F_mass, rho_F):
+    """
+    Calculates the flow rate pump for Feed.
+    Parameters
+    ----------
+    F_mass : float
+        The flow rate of Feed, [kg / s]
+    rho_F : float
+        The density of feed, [kg / m**3]
+    Returns
+    -------
+    flate_pump_feed : float
+        The flow rate pump for Feed [m**3 / h]
+    References
+    ----------
+    &&&&
+    """       
+    return (F_mass / rho_F)
+
+
+def high_geometric(plate_low, lenght_bottom, lenght_support, H_bwplate):
+    """
+    Calculates the  geometric heigth.
+    Parameters
+    ----------
+    H_bwplate : float
+        The heigth of between plates, [m]
+    plate_low : float
+        The quantity of plates of low column, [dismensionless]
+    lenght_bottom : float
+        The length between bottom and lowest plate of column, [m]
+    lenght_support : float
+        The length of support, [m]    
+    Returns
+    -------
+    high_geometric : float
+        The geometric heigth, [m]
+    References
+    ----------
+    &&&&
+    """    
+    return (lenght_plate_low * H_bwplate + lenght_bottom + lenght_support)
+
+def head_pump(high_geometric, hydraulic_losses):
+    """
+    Calculates the  hydraulic head of pump.
+    Parameters
+    ----------
+    high_geometric : float
+        The geometric heigth, [m]
+    hydraulic_losses : float
+        The hydraulic losses  of pump, [m]
+    Returns
+    -------
+    head_pump : float
+        The  hydraulic head of pump, [m]
+    References
+    ----------
+    &&&&
+    """       
+    return (high_geometric + high_losses)
+
+
+def power_pump(flate_pump_feed, rho_F, g, head_pump, ECE_motor, ECE_trans):
+    """
+    Calculates the  power of pump.
+    Parameters
+    ----------
+    flate_pump_feed : float
+        The flow rate pump for Feed [m**3 / h]
+    rho_F : float
+        The density of feed, [kg / m**3]
+    head_pump : float
+        The  hydraulic head of pump, [m]
+    ECE_motor : float
+        The energy conversion efficiency of motor, [dismensionless]
+    ECE_trans : float
+        The energy conversion efficiency of transfer, [dismensionless]       
+    Returns
+    -------
+    power_pump : float
+        The  power of pump, [kW]
+    References
+    ----------
+    &&&&
+    """   
+    return (flate_pump_feed * rho_F * g * head_pump / (ECE_motor * ECE_trans))
+
+#endregion
