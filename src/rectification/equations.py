@@ -1460,7 +1460,7 @@ def flate_pump_feed(F_mass, rho_F):
     Returns
     -------
     flate_pump_feed : float
-        The flow rate pump for Feed [m**3 / h]
+        The flow rate pump for Feed [m**3 / s]
     References
     ----------
     &&&&
@@ -1535,5 +1535,85 @@ def power_pump(flate_pump_feed, rho_F, g, head_pump, ECE_motor, ECE_trans):
     &&&&
     """   
     return (flate_pump_feed * rho_F * g * head_pump / (ECE_motor * ECE_trans))
+
+#endregion
+
+
+#region The maximum theoretical suction height
+def heigth_max_suction(Pa, rho_F, g, P_satur_vapor, speed_suction, hydraulic_losses_suct, heigth_cavitation):
+    """
+    Calculates the maximum theoretical suction height.
+    Parameters
+    ----------
+    Pa : float
+        The atmosphere pressure [Pa]
+    rho_F : float
+        The density of feed, [kg / m**3]
+    P_satur_vapor : float
+        The  pressure of saturated vapor, [Pa]
+    speed_suction : float
+        The speed of suction line , [m/s]
+    hydraulic_losses_suct : float
+        The hydraulic losses of suction line, [m]      
+    heigth_cavitation : float
+        The losses due to cavitation, [m]  
+    Returns
+    -------
+    heigth_max_suction : float
+        The maximum theoretical suction height, [m]
+    References
+    ----------
+    &&&&
+    """   
+    return ((Pa/(rho_F * g) - ((P_satur_vapor)/(rho_F * g) + ((speed_suction / (2 * g))) + hydraulic_losses_satur + heigth_cavitation))
+
+
+def heigth_cavitation(flate_pump_feed, n_turnover):
+    """
+    Calculates the losses due to cavitation.
+    Parameters
+    ----------
+    flate_pump_feed : float
+        The flow rate pump for Feed [m**3 / s]
+    n_turnover : float
+        The quantity turnover of pump, [ turnover / s] 
+    Returns
+    -------
+    heigth_cavitation : float
+        The losses due to cavitation, [m]
+    References
+    ----------
+    &&&&
+    """      
+    return (0,3* (flate_pump_feed * n_turnover**2)**(2/3))
+
+
+def hydraulic_losses_suct(dzeta_enter, dzeta_turn90, n_turn90, dzeta_ventil, n_ventil, g, speed_suction):
+    """
+    Calculates the hydraulic losses of suction line.
+    Parameters
+    ----------
+    dzeta_enter : float
+        The local resistance of tube enter, [m]
+    dzeta_turn90 : float
+        The local resistance of turn to 90 degrees, [m]
+    n_turn90 : float
+        The quantity of turn to 90 degrees, [dismensionless]
+    dzeta_ventil : float
+        The local resistance of ventil on sunction line, [m]
+    n_ventil : float
+        The quantity of ventil on suction line, [dismensionless]
+    speed_suction : float
+        The speed of suction line , [m/s] 
+    Returns
+    -------
+    hydraulic_losses_suct : float
+        The hydraulic losses of suction line, [m]
+    References
+    ----------
+    &&&&
+    """         
+    return ((dzeta_enter + dzeta_turn90 + dzeta_ventil)*speed_suction/(2 * g))
+
 
 #endregion
