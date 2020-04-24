@@ -1694,3 +1694,368 @@ def W_mol(W_mass, M_waste):
 
 #output for mat.balance : P_mol, F_mol, W_mol, xf_mol, xp_mol, xw_mol, W_mass, P_mass
 #endregion
+
+
+#region Reflux and mass ways of liq and vapor
+def R_min (xp_mol, y*_mol_xf, xf_mol):
+    """
+    Calculates the minimal reflux number.
+    Parameters
+    ----------
+    xp_mol : float
+        The mol concentration low component of distilliat, [kmol/kmol]
+    xf_mol : float
+        The mol concentration low component of feed, [kmol/kmol]
+    y*_mol_xf : float
+        The equilibrium concentration low component of vapor at concentration of feed (liquid), [kmol/kmol]    
+    Returns
+    -------
+    R_min : float
+        The minimal reglux number, [dismensionless]
+    References
+    ----------
+    Дытнерский, стр.228, формула 6.2
+    """     
+    return (xp_mol - y*_mol_xf) / (y*_mol_xf  - xf_mol)
+
+
+def R (Rmin, beta):
+    """
+    Calculates the actual reflux number.
+    Parameters
+    ----------
+    R_min : float
+        The minimal reglux number, [dismensionless]
+    beta : float
+        The overflow of reflux, [dismensionless]    
+    Returns
+    -------
+    R : float
+        The actual reflux number, [dismensionless]
+    References
+    ----------
+    Романков, стр.321, формула 7.11
+    """         
+    return Rmin * beta
+
+
+#operating line #N(R+1) N
+
+
+def x_aver_top(xp_mol, xpf_mol):
+    """
+    Calculates the average mol concentration at the top of column.
+    Parameters
+    ----------
+    xp_mol : float
+        The mol concentration  of distilliat, [kmol/kmol]
+    xpf_mol : float
+        The mol concentration of point of feed, [kmol/kmol]  
+    Returns
+    -------
+    x_aver_top : float
+        The average mol concentration at top of column, [kmol/kmol]
+    References
+    ----------
+    Дытнерский, стр.230, формула 6.6
+    """            
+    return (xp_mol + xpf_mol) / 2
+
+
+def x_aver_bot(xw_mol, xpf_mol):
+    """
+    Calculates the average mol concentration  at bottom of column.
+    Parameters
+    ----------
+    xw_mol : float
+        The mol concentration  of waste, [kmol/kmol]
+    xpf_mol : float
+        The mol concentration of point of feed, [kmol/kmol]  
+    Returns
+    -------
+    x_aver_top : float
+        The average mol concentration at top of column, [kmol/kmol]
+    References
+    ----------
+    Дытнерский, стр.230, формула 6.6
+    """            
+    return (xw_mol + xpf_mol) / 2
+
+
+def M_top(M_lc, x_aver_top, M_hc):
+    """
+    Calculates the molar mass at top of column.
+    Parameters
+    ----------
+    x_aver_top : float
+        The average mol concentration at top of column, [kmol/kmol]
+    M_lc : float
+        The molar mass of low-boilling component, [kg/kmol]
+    M_hc : float
+        The molar mass of high-boilling component, [kg/kmol]
+    Returns
+    -------
+    M_top : float
+        The molar mass at top of column, [kg/kmol]
+    References
+    ----------
+    Дытнерский, стр. 230, формула 6.6
+    """ 
+    return (M_lc * x_aver_top + M_hc * (1 - x_aver_top))
+
+
+def M_bot(M_lc, x_aver_bot, M_hc):
+    """
+    Calculates the molar mass at bottom of column.
+    Parameters
+    ----------
+    x_aver_bot : float
+        The average mol concentration at bottom of column, [kmol/kmol]
+    M_lc : float
+        The molar mass of low-boilling component, [kg/kmol]
+    M_hc : float
+        The molar mass of high-boilling component, [kg/kmol]
+    Returns
+    -------
+    M_bot : float
+        The molar mass at bottom of column, [kg/kmol]
+    References
+    ----------
+    Дытнерский, стр. 230, формула 6.6
+    """ 
+    return (M_lc * x_aver_bot + M_hc * (1 - x_aver_bot))
+
+
+def L_top(P_mass, R, M_top, M_dist):
+    """
+    Calculates the flow rate liquid at the top of column.
+    Parameters
+    ----------
+    P_mass : float
+        The mass flow rate of distilliat, [kg/s]
+    M_dist : float
+        The molar mass  of distilliat, [kg/kmol]
+    R : float
+        The actual reflux number, [dismensionless]
+    M_top : float
+        The molar mass at top of column, [kg/kmol]    
+    Returns
+    -------
+    L_top : float
+        The  flow rate liquid at the top of column, [kg/s]
+    References
+    ----------
+    Дытнерский, стр. 229, формула 6.4
+    """ 
+    return P_mass * R * M_top / M_dist
+
+
+def L_bot(P_mass, R, M_bot, M_dist, F_mass, M_feed, phi):
+    """
+    Calculates the flow rate liquid at the bottom of column.
+    Parameters
+    ----------
+    P_mass : float
+        The mass flow rate of distilliat, [kg/s]
+    F_mass : float
+        The mass flow rate of feed, [kg/s]
+    M_dist : float
+        The molar mass  of distilliat, [kg/kmol]
+    M_feed : float
+        The molar mass  of feed, [kg/kmol]
+    phi : float
+        The fraction of vapor at the feed point
+    R : float
+        The actual reflux number, [dismensionless]
+    M_bot : float
+        The molar mass at bottom of column, [kg/kmol]    
+    Returns
+    -------
+    L_bot : float
+        The  flow rate liquid at the bottom of column, [kg/s]
+    References
+    ----------
+    Дытнерский, стр. 229, формула 6.5
+    """ 
+    return (P_mass * R * M_bot / M_dist) + (F_mass * M_bot * (1 - phi) / M_feed)
+
+
+def y_aver_top(yp_mol, ypf_mol):
+    """
+    Calculates the average mol concentration at the top of column.
+    Parameters
+    ----------
+    yp_mol : float
+        The mol concentration  of distilliat, [kmol/kmol]
+    ypf_mol : float
+        The mol concentration of point of feed, [kmol/kmol]  
+    Returns
+    -------
+    y_aver_top : float
+        The average mol concentration at top of column, [kmol/kmol]
+    References
+    ----------
+    Дытнерский, стр.230, формула 6.8
+    """            
+    return (yp_mol + ypf_mol) / 2
+
+
+def y_aver_bot(yw_mol, ypf_mol):
+    """
+    Calculates the average mol concentration  at bottom of column.
+    Parameters
+    ----------
+    yw_mol : float
+        The mol concentration  of waste, [kmol/kmol]
+    ypf_mol : float
+        The mol concentration of point of feed, [kmol/kmol]  
+    Returns
+    -------
+    y_aver_top : float
+        The average mol concentration at top of column, [kmol/kmol]
+    References
+    ----------
+    Дытнерский, стр.230, формула 6.8
+    """            
+    return (yw_mol + ypf_mol) / 2
+
+
+def M_top_vap(M_lc, y_aver_top, M_hc):
+    """
+    Calculates the molar mass at top of column.
+    Parameters
+    ----------
+    y_aver_top : float
+        The average mol concentration at top of column, [kmol/kmol]
+    M_lc : float
+        The molar mass of low-boilling component, [kg/kmol]
+    M_hc : float
+        The molar mass of high-boilling component, [kg/kmol]
+    Returns
+    -------
+    M_top : float
+        The molar mass at top of column, [kg/kmol]
+    References
+    ----------
+    Дытнерский, стр. 230, формула 6.8
+    """ 
+    return (M_lc * y_aver_top + M_hc * (1 - y_aver_top))
+
+
+def M_bot_vap(M_lc, y_aver_bot, M_hc):
+    """
+    Calculates the molar mass at bottom of column.
+    Parameters
+    ----------
+    y_aver_bot : float
+        The average mol concentration at bottom of column, [kmol/kmol]
+    M_lc : float
+        The molar mass of low-boilling component, [kg/kmol]
+    M_hc : float
+        The molar mass of high-boilling component, [kg/kmol]
+    Returns
+    -------
+    M_bot : float
+        The molar mass at bottom of column, [kg/kmol]
+    References
+    ----------
+    Дытнерский, стр. 230, формула 6.8
+    """ 
+    return (M_lc * y_aver_bot + M_hc * (1 - y_aver_bot))
+
+
+def G_top(P_mass, R, M_top_vap, M_dist):
+    """
+    Calculates the flow rate liquid at the top of column.
+    Parameters
+    ----------
+    P_mass : float
+        The mass flow rate of distilliat, [kg/s]
+    M_dist : float
+        The molar mass  of distilliat, [kg/kmol]
+    R : float
+        The actual reflux number, [dismensionless]
+    M_top_vap : float
+        The molar mass at top of column, [kg/kmol]    
+    Returns
+    -------
+    G_top : float
+        The  flow rate of the vapor at the top of column, [kg/s]
+    References
+    ----------
+    Дытнерский, стр. 229, формула 6.7
+    """ 
+    return P_mass * (R + 1) * M_top_vap / M_dist
+
+
+def G_bot(P_mass, R, M_bot_vap, M_dist, F_mass, M_feed, phi):
+    """
+    Calculates the flow rate liquid at the bottom of column.
+    Parameters
+    ----------
+    P_mass : float
+        The mass flow rate of distilliat, [kg/s]
+    F_mass : float
+        The mass flow rate of feed, [kg/s]
+    M_dist : float
+        The molar mass  of distilliat, [kg/kmol]
+    M_feed : float
+        The molar mass  of feed, [kg/kmol]
+    phi : float
+        The fraction of vapor at the feed point
+    R : float
+        The actual reflux number, [dismensionless]
+    M_bot_vap : float
+        The molar mass of the vapor at bottom of column, [kg/kmol]    
+    Returns
+    -------
+    G_bot : float
+        The  flow rate of the vapor at the bottom of column, [kg/s]
+    References
+    ----------
+    Дытнерский, стр. 229, формула 6.7
+    """ 
+    return (P_mass * R * M_bot / M_dist) - (F_mass * M_bot_vap * phi/ M_feed) ## 2018 и 1880 проверка знака второго слагаемого
+
+
+def x_aver_top_mass(xp_mass, xpf_mass):
+    """
+    Calculates the average mass concentration at the top of column.
+    Parameters
+    ----------
+    xp_mass : float
+        The mass concentration  of distilliat, [kg/kg]
+    xpf_mass : float
+        The mass concentration of point of feed, [kg/kg]  
+    Returns
+    -------
+    x_aver_top_mass : float
+        The average mass concentration at top of column, [kg/kg]
+    References
+    ----------
+    Дытнерский, стр.230, формула 6.8
+    """            
+    return (xp_mass + xpf_mass) / 2
+
+
+def x_aver_bot_mass(xw_mol, xpf_mass):
+    """
+    Calculates the average mass concentration  at bottom of column.
+    Parameters
+    ----------
+    xw_mass : float
+        The mass concentration  of waste, [kg/kg]
+    xpf_mass : float
+        The mass concentration of point of feed, [kg/kg]  
+    Returns
+    -------
+    x_aver_top_mass : float
+        The average mass concentration at top of column, [kg/kg]
+    References
+    ----------
+    Дытнерский, стр.230, формула 6.8
+    """            
+    return (xw_mass + xpf_mass) / 2
+
+
+#endregion
