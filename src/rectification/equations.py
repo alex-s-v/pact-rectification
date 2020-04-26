@@ -1,6 +1,7 @@
 from rectification.utils import unitcheck
 from scipy.constants import g
 import numpy as np
+Vm = 22.4
 
 
 def operating_line(x, R, xp):
@@ -1739,7 +1740,7 @@ def R (Rmin, beta):
     return Rmin * beta
 
 
-#operating line #N(R+1) N
+
 
 
 def x_aver_top(xp_mol, xpf_mol):
@@ -2049,13 +2050,277 @@ def x_aver_bot_mass(xw_mol, xpf_mass):
         The mass concentration of point of feed, [kg/kg]  
     Returns
     -------
-    x_aver_top_mass : float
-        The average mass concentration at top of column, [kg/kg]
+    x_aver_bot_mass : float
+        The average mass concentration at bot of column, [kg/kg]
     References
     ----------
     Дытнерский, стр.230, формула 6.8
     """            
     return (xw_mass + xpf_mass) / 2
 
+def rho_top_liq(x_aver_top_mass, rho_lc_x_aver_top, rho_hc_x_aver_top):
+    """
+    Calculates the destiny of liquid at top of column.
+    Parameters
+    ----------
+    x_aver_top_mass : float
+        The average mass concentration at top of column, [kg/kg]
+    rho_lc_x_aver_top : float
+        The destiny of low-boilling component for mass average concentration at the top of column, [kg/m**3]
+    rho_hc_x_aver_top : float
+        The destiny of high-boilling component for mass average concentration at the top of column, [kg/m**3] 
+    Returns
+    -------
+    rho_top_liq : float
+        The destiny of liquid at top of column, [kg/m**3]
+    References
+    ----------
+    Романков, стр.12, формула 1.3
+    """            
+    return ((x_aver_top_mass / rho_lc_x_aver_top) + ((1 - x_aver_top_mass) / rho_hc_x_aver_top))
 
+
+def rho_bot_liq(x_aver_bot_mass, rho_lc_x_aver_bot, rho_hc_x_aver_bot):
+    """
+    Calculates the destiny of liquid at the bottom of column.
+    Parameters
+    ----------
+    x_aver_bot_mass : float
+        The average mass concentration at the bottom of column, [kg/kg]
+    rho_lc_x_aver_bot : float
+        The destiny of low-boilling component for mass average concentration at the bottom of column, [kg/m**3]
+    rho_hc_x_aver_bot : float
+        The destiny of high-boilling component for mass average concentration at the bottom of column, [kg/m**3]   
+    Returns
+    -------
+    rho_bot_liq : float
+        The destiny of liquid at the bottom of column, [kg/m**3]
+    References
+    ----------
+    Романков, стр.12, формула 1.3
+    """            
+    return ((x_aver_bot_mass / rho_lc_x_aver_bot) + ((1 - x_aver_bot_mass) / rho_hc_x_aver_bot))
+
+
+def rho_top_vap(t_boil_y_top, T0, Vm, M_top_vap):
+    """
+    Calculates the destiny of vapor at the top of column.
+    Parameters
+    ----------
+    t_boil_y_top : float
+        The boilling temperature of low-bolling component of vapor at the top of column, [C]
+    T0 : float
+        The initial temperature, [K]
+    M_top_vap : float
+        The molar mass at top of column, [kg/kmol]    
+    Returns
+    -------
+    rho_top_vap : float
+        The destiny of vapor at top of column, [kg/m**3]
+    References
+    ----------
+    Романков, стр.13, формула 1.5
+    """            
+    return (M_top_vap / Vm) * (T0 / (T0 + t_boil_y_top))
+
+
+def rho_bot_vap(t_boil_y_bot, T0, Vm, M_bot_vap):
+    """
+    Calculates the destiny of vapor at the bottom of column.
+    Parameters
+    ----------
+    t_boil_y_bot : float
+        The boilling temperature of low-bolling component of vapor at the bottom of column, [C]
+    T0 : float
+        The initial temperature, [K]
+    M_bot_vap : float
+        The molar mass at bottom of column, [kg/kmol]    
+    Returns
+    -------
+    rho_bot_vap : float
+        The destiny of vapor at bottom of column, [kg/m**3]
+    References
+    ----------
+    Романков, стр.13, формула 1.5
+    """            
+    return (M_bot_vap / Vm) * (T0 / (T0 + t_boil_y_bot))  
+
+#operating line #N(R+1) N
+#output: G_top, G_bot, L_bot, L_top, Rmin
 #endregion
+
+
+#region The speed and diameter of column
+def speed_limit_top(rho_top_liq, rho_top_vap):
+    """
+    Calculates the limit speed of the vapor in the column.
+    Parameters
+    ----------
+    rho_top_vap : float
+        The destiny of vapor at the top of column, [kg/m**3]
+    rho_top_liq : float
+        The destiny of liquid at top of column, [kg/m**3] 
+    Returns
+    -------
+    speed_limit_top : float
+        The limit speed of the vapor at the top of  column, [m/s]
+    References
+    ----------
+    Дытнерский, стр.205, формула 5.33
+    """   
+    return (rho_top_liq / rho_bot_vap)^0.5
+
+
+def speed_limit_bot(rho_bot_liq, rho_bot_vap):
+    """
+    Calculates the limit speed of the vapor in the column.
+    Parameters
+    ----------
+    rho_bot_vap : float
+        The destiny of vapor at the bottom of column, [kg/m**3]
+    rho_bot_liq : float
+        The destiny of liquid at the bottom of column, [kg/m**3] 
+    Returns
+    -------
+    speed_limit_bot : float
+        The limit speed of the vapor at the bottom in  column, [m/s]
+    References
+    ----------
+    Дытнерский, стр.205, формула 5.33
+    """   
+    return (rho_top_liq / rho_bot_vap)^0.5
+
+
+def D_top(G_top, pi, speed_limit_top, rho_top_vap):
+    """
+    Calculates the top diameter of column.
+    Parameters
+    ----------
+    rho_top_vap : float
+        The destiny of vapor at the top of column, [kg/m**3]
+    speed_limit_top : float
+        The limit speed of the vapor at the top of  column, [m/s]
+    G_top : float
+        The  flow rate of the vapor at the top of column, [kg/s]    
+    Returns
+    -------
+    D_top : float
+        The top diameter of column, [m]
+    References
+    ----------
+    &&&&&
+    """       
+    return (4 * G_top / (pi * speed_limit_top * rho_top_vap))^0.5
+
+
+def D_bot(G_bot, pi, speed_limit_bot, rho_bot_vap):
+    """
+    Calculates the bottom diameter of column.
+    Parameters
+    ----------
+    rho_bot_vap : float
+        The destiny of vapor at the bottom of column, [kg/m**3]
+    speed_limit_bot : float
+        The limit speed of the vapor at the bottom in  column, [m/s]
+    G_bot : float
+        The  flow rate of the vapor at the bottom of column, [kg/s]    
+    Returns
+    -------
+    D_bot : float
+        The bottom diameter of column, [m]
+    References
+    ----------
+    &&&&&
+    """       
+    return (4 * G_bot / (pi * speed_limit_bot * rho_bot_vap))^0.5
+
+
+def speed_section_top(speed_limit_top, D_top, D):
+    """
+    Calculates the section speed of vapor
+    Parameters
+    ----------
+    speed_limit_top : float
+        The limit speed of the vapor at the top of  column, [m/s]
+    D_top : float
+        The calculating top diameter of column, [m]
+    D : float
+        The choosing diameter of column, [m]   
+    Returns
+    -------
+    speed_section_top : float
+        The section speed of vapor, [m/s]
+    References
+    ----------
+    &&&&&
+    """         
+    return speed_limit_top * (D/top / D)**2
+
+
+def speed_section_bot(speed_limit_bot, D_bot, D):
+    """
+    Calculates the section speed of vapor at the bottom
+    Parameters
+    ----------
+    speed_limit_bot: float
+        The limit speed of the vapor at the bottom of  column, [m/s]
+    D_bot : float
+        The calculating bottom diameter of column, [m]
+    D : float
+        The choosing diameter of column, [m]   
+    Returns
+    -------
+    speed_section_bot : float
+        The section speed of vapor at the bottom, [m/s]
+    References
+    ----------
+    &&&&&
+    """         
+    return speed_limit_bot * (D/bot / D)**2
+
+
+def speed_operating_section_top(speed_section_top, D, ft):
+    """
+    Calculates the operating section speed of vapor at the top
+    Parameters
+    ----------
+    speed_section_top : float
+        The section speed of vapor at the top, [m]
+    D : float
+        The choosing diameter of column, [m]  
+    ft : float
+        The operating section of plate, [m**2] 
+    Returns
+    -------
+    speed_operating_section_top : float
+        The operating section speed of vapor at the top, [m/s]
+    References
+    ----------
+    &&&&&
+    """         
+    return speed_section_top * (0.785 * D**2 / ft)
+
+
+def speed_operating_section_bot(speed_section_bot, D, ft):
+    """
+    Calculates the operating section speed of vapor at the bottom
+    Parameters
+    ----------
+    speed_section_bot : float
+        The section speed of vapor at the bottom, [m]
+    D : float
+        The choosing diameter of column, [m]  
+    ft : float
+        The operating section of plate, [m**2] 
+    Returns
+    -------
+    speed_operating_section_bot : float
+        The operating section speed of vapor at the bottom, [m/s]
+    References
+    ----------
+    &&&&&
+    """         
+    return speed_section_bot * (0.785 * D**2 / ft)
+
+    #output D_top, D_bot, D, w_operating_section_top, w_operating_section_bot
+    #endregion 
