@@ -507,8 +507,8 @@ def deltaT_less(t_vapor, tboil_mix):
     return t_vapor - tboil_mix
 
 
-@unitcheck(deltaT="degrees celcium", F_mass="kg/s", Cp="J/(kg * degrees celcium", res_unit="W")
-def Qload_feed(deltaT, F_mass, Cp, phi_vapor, Feed_vaporazation):
+@unitcheck(deltaT="degrees celcium", F_mass="kg/s", Cp="J/(kg * degrees celcium", r_feed="J/kg" res_unit="W")
+def Q_feed(deltaT, F_mass, Cp, phi_vapor, r_feed):
     """
     Calculates the heat load of heat exchanger.
     Parameters
@@ -521,17 +521,17 @@ def Qload_feed(deltaT, F_mass, Cp, phi_vapor, Feed_vaporazation):
         The heat capacity of mix [J/(kg * degrees C)]
     phi_vapor: float
         The part of vapor in feed, [dimensionless]
-    Feed_vaporazation : float
+    r_feed : float
         The heat vaporazation of mix, [J/kg]
     Returns
     -------
-    Qload_feed : float
+    Q_feed : float
         The heat load of heat exchanger, [W] , [J/s]
     References
     ----------
     Дытнерский, формула 2.2, стр.45
     """   
-    return F_mass * (Cp * deltaT + phi_vapor * Feed_vaporazation)
+    return F_mass * (Cp * deltaT + phi_vapor * r_feed)
 
 
 def deltaT(tinit_mix, tboil_mix):
@@ -554,13 +554,13 @@ def deltaT(tinit_mix, tboil_mix):
     return tinit_mix - tboil_mix
 
 
-@unitcheck(Qload_feed="W", deltaT_diff="degrees celcium",  Kt_approx="W/(m**2 * degrees celcium", res_unit="m**2")
-def A_approx(Qload_feed, deltaT_diff, Kt_approx):
+@unitcheck(Q_feed="W", deltaT_diff="degrees celcium",  Kt_approx="W/(m**2 * degrees celcium", res_unit="m**2")
+def A_approx(Q_feed, deltaT_diff, Kt_approx):
     """
     Calculates the approximate heatransfer area.
     Parameters
     ----------
-    Qload_feed : float
+    Q_feed : float
         The heat load of heat exchanger, [W] , [J/s]
     deltaT_diff : float
         The coefficient difference of temperatures, [degrees celcium]
@@ -574,17 +574,17 @@ def A_approx(Qload_feed, deltaT_diff, Kt_approx):
     ----------
     Романков, формула 4.72, стр.168
     """           
-    return Qload_feed / (deltaT_diff * Kt_approx)
+    return Q_feed / (deltaT_diff * Kt_approx)
 
 
-def flatesteam_feed(Qload_feed, vaporazation_steam):
+def flatesteam_feed(Q_feed, r_steam):
     """
     Calculates the flow rate steam of boiler.
     Parameters
     ----------
-    Qload_feed : float
+    Q_feed : float
         The heat load feed of heat exchanger, [W] [J/s]
-    vaporazation_steam : float
+    r_steam : float
         The heat vaporazation of dist [J/kg]
     Returns
     -------
@@ -594,7 +594,7 @@ def flatesteam_feed(Qload_feed, vaporazation_steam):
     ----------
     Дытнерский, формула 2.3, стр.45
     """               
-    return Qload_feed / vaporazation_steam
+    return Q_feed / r_steam
     
 
 def Re(F_mass, z_way, d_inner, n_pipe, mu_mix):
@@ -760,13 +760,13 @@ def Kt_real(alpha_liq, alpha_vap, sigma_thermpollution):
     """      
     return ((1 / alpha_liq) + (1 / alpha_vap) + (sigma_thermpollution))**-1
 
-@unitcheck(Qload_feed="W", deltaT_diff="degrees celcium",  Kt_approx="W/(m**2 * degrees celcium", res_unit="m**2")
-def A_real(Qload_feed, Kt_real, deltaT_diff):
+@unitcheck(Q_feed="W", deltaT_diff="degrees celcium",  Kt_approx="W/(m**2 * degrees celcium", res_unit="m**2")
+def A_real(Q_feed, Kt_real, deltaT_diff):
     """
     Calculates the real heatransfer area.
     Parameters
     ----------
-    Qload_feed : float
+    Ql_feed : float
         The heat load of heat exchanger, [W] , [J/s]
     deltaT_diff : float
         The coefficient difference of temperatures, [degrees celcium]
@@ -780,7 +780,7 @@ def A_real(Qload_feed, Kt_real, deltaT_diff):
     ----------
     Романков, формула 4.72, стр.168
     """      
-    return Qload_feed / (Kt_real * deltaT_diff)
+    return Q_feed / (Kt_real * deltaT_diff)
 
 
 def surface_margin (A_approx, A_real):
@@ -2323,3 +2323,100 @@ def speed_operating_section_bot(speed_section_bot, D, ft):
 
     #output D_top, D_bot, D, w_operating_section_top, w_operating_section_bot
     #endregion 
+
+
+
+def sigma_top(sigma_lc_top, sigma_hc_top, x_aver_top_mass):
+    """
+    Calculates the surface tension at the top of column.
+    Parameters
+    ----------
+    sigma_lc_top : float
+        The surface tension of low-boilling component at the top of column, [N / m]
+    sigma_hc_top : float
+        The surface tension of high-boilling component at the top of column, [N / m]
+    x_aver_top_mass : float
+        The average mass concentration at top of column, [kg/kg]
+    Returns
+    -------
+    sigma_top : float
+        The surface tension at the top of column, [N / m]
+    References
+    ----------
+    &&&&&
+    """       
+    return (sigma_lc_top * x_aver_top_mass  + (1 - x_aver_top_mass) * sigma_hc_top)
+
+
+def sigma_bot(sigma_lc_bot, sigma_hc_bot, x_aver_bot_mass):
+    """
+    Calculates the surface tension at the bottom of column.
+    Parameters
+    ----------
+    sigma_lc_bot : float
+        The surface tension of low-boilling component at the bottom of column, [N / m]
+    sigma_hc_bot : float
+        The surface tension of high-boilling component at the bottom of column, [N / m]
+    x_aver_bot_mass : float
+        The average mass concentration at bot of column, [kg/kg]
+    Returns
+    -------
+    sigma_bot : float
+        The surface tension at the  bottom of column, [N / m]
+    References
+    ----------
+    &&&&&
+    """       
+    return (sigma_lc_bot * x_aver_bot_mass  + (1 - x_aver_bot_mass) * sigma_hc_bot) 
+
+
+#region The High of Column 
+def Ky(beta_liq, beta_vapor, m_distrib):
+    """
+    Calculates the masstransfer coefficent Ky.
+    Parameters
+    ----------
+    beta_liq : float
+        The masstransfer coefficent beta of liquid, [kmol / (m**2 * s)]
+    beta_vapor : float
+        The masstransfer coefficent beta of vapor, [kmol / (m**2 * s)]
+    m_distrib : float
+        The distribution coefficient, [dismensionless]
+    Returns
+    -------
+    Ky : float
+        The masstransfer coefficent Ky, [kmol / (m**2 * s)]
+    References
+    ----------
+    Дытнерский, стр.194 формула 5.8
+    """        
+    return ((1 / beta_vapor) + (m_distrib / beta_liq))^(-1)
+
+
+def noy(Ky, M, rho, w):
+    """
+    Calculates the number of units at the plate.
+    Parameters
+    ----------
+    Ky : float
+        The masstransfer coefficent Ky, [kmol / (m**2 * s)]
+    M : float
+        The molar mass, [kg / kmol]
+    rho : float
+        The destiny , [kg / m**3]
+    w : float
+        The speed [m / s]
+    Returns
+    -------
+    noy : float
+        The number of units at the plate, [dismensionless]
+    References
+    ----------
+    Дытнерский, стр.239 формула 6.35
+    """    
+    return Ky * M / (rho * w)
+
+
+def lyambda_fact_top(m_distrib, R):
+    return m_distrib * (R + 1) / R
+  
