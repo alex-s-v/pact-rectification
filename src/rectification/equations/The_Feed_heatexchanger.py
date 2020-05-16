@@ -138,7 +138,7 @@ def A_approx(Q_feed, deltaT_diff, Kt_approx):
 
 
 @unitcheck(Q_feed="J/s", r_steam="J/kg", res_unit="kg/s")
-def m_vapor_feed(Q_feed, r_steam):
+def m_steam_feed(Q_feed, r_steam):
     """
     Calculates the flow rate steam of boiler.
     Parameters
@@ -149,7 +149,7 @@ def m_vapor_feed(Q_feed, r_steam):
         The heat vaporazation of dist [J/kg]
     Returns
     -------
-    m_vapor_feed : float
+    m_steam_feed : float
         The flow rate steam of feed heat exchanger, [kg/s]
     References
     ----------
@@ -251,8 +251,8 @@ def alpha_liq(Nu, lyambda_feed, d_inner):
     return Nu * lyambda_feed / d_inner
 
 
-@unitcheck(lyambda_cond="W / (m * degrees celcium)", rho_cond="kg / m**3",  mu_cond="Pa / s", m_vapor_feed="kg/s", d_outside="m", res_unit="W / (m**2 * degrees celcium)")
-def alpha_vap(lyambda_cond, rho_cond, mu_cond, m_vapor_feed, n_pipe, d_outside):
+@unitcheck(lyambda_cond="W / (m * degrees celcium)", rho_cond="kg / m**3",  mu_cond="Pa / s", m_steam_feed="kg/s", d_outside="m", res_unit="W / (m**2 * degrees celcium)")
+def alpha_vap(lyambda_cond, rho_cond, mu_cond, m_steam_feed, n_pipe, d_outside):
     """
     Calculates the coefficent of heat transfer(alpha) from steam to wall of pipe.
     Parameters
@@ -263,7 +263,7 @@ def alpha_vap(lyambda_cond, rho_cond, mu_cond, m_vapor_feed, n_pipe, d_outside):
         The destiny of condensate, [kg / m**3]
     mu_cond : float
         The viscosity of condensate, [Pa / s]
-    m_vapor_feed : float
+    m_steam_feed : float
         The flow rate steam of feed heat exchanger, [kg/s]
     n_pipe : float
         The number of pipes in heat exchanger, [dimensionless]
@@ -277,7 +277,7 @@ def alpha_vap(lyambda_cond, rho_cond, mu_cond, m_vapor_feed, n_pipe, d_outside):
     ----------
     Дытнерский, формула 2.24, стр.53
     """              
-    return lyambda_cond * 3.78 * ((rho_cond**2)* n_pipe * d_outside / (mu_cond * m_vapor_feed))**(1/3)
+    return lyambda_cond * 3.78 * ((rho_cond**2)* n_pipe * d_outside / (mu_cond * m_steam_feed))**(1/3)
 
 
 @unitcheck(pollution_1="m**2 * degrees celcium / W", pollution_2="m**2 * degrees celcium / W", sigma="m",  lyambda_wall="W / (m * degrees celcium)", res_unit="m**2 * degrees celcium / W")
