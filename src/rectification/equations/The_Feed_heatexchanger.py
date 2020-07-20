@@ -159,7 +159,7 @@ def m_steam_feed(Q_feed, r_steam):
     
 
 @unitcheck(F_mass="kg/s", d_inner="m", mu_feed="Pa/s")
-def Re(F_mass, z_way, d_inner, n_pipe, mu_feed):
+def Re_feed(F_mass, z_way, d_inner, n_pipe, mu_feed):
     """
     Calculates the Reynold criterion.
     Parameters
@@ -176,7 +176,7 @@ def Re(F_mass, z_way, d_inner, n_pipe, mu_feed):
         The mix viscocity of liquid, [Pa/s]
     Returns
     -------
-    Re : float
+    Re_feed : float
         The Reynold criterion, [dimensionless]
     References
     ----------
@@ -208,12 +208,12 @@ def Pr(C_feed, mu_feed, lyambda_feed):
     return C_feed * mu_feed / lyambda_feed
 
 
-def Nu(Re, Pr):
+def Nu(Re_feed, Pr):
     """
     Calculates the Nusselt criterion.
     Parameters
     ----------
-    Re : float
+    Re_feed : float
         The Reynold criterion, [dimensionless]
     Pr : float
         The Prandtl criterion, [dimensionless]
@@ -225,7 +225,7 @@ def Nu(Re, Pr):
     ----------
     Романков, формула 4.17, стр.152
     """      
-    return 0.021 * (Re**0.8) * (Pr**0.4)
+    return 0.021 * (Re_feed**0.8) * (Pr**0.4)
 
 
 @unitcheck(lyambda_feed="W / (m * degreec celcium)", d_inner="m", res_unit="W / (m**2 * degrees celcium)")
