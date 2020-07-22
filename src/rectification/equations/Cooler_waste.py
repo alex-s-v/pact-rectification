@@ -67,7 +67,7 @@ def deltaT_less_waste(tw, t_coolwater_enter):
     return tw - t_coolwater_enter
 
 
-@unitcheck(deltaT_waste="degrees celcium", F_mass="kg/s", Cp="J/(kg * degrees celcium", r_feed="J/kg", res_unit="W")
+@unitcheck(deltaT_waste="degrees celcium", W_mass="kg/s", Cp="J/(kg * degrees celcium", r_feed="J/kg", res_unit="W")
 def Q_wastecooler(W_mass, Cw, t_coolwater_exit, tw):
     """
     Calculates the heat load of waste cooler.
