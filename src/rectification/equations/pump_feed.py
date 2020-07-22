@@ -258,4 +258,4 @@ def heigth_max_suction(Pa, rho_F_20, g, P_satur_vapor_feed, w_liq_real_enter_fee
     ----------
     &&&&
     """   
-    return ((Pa/(rho_F_20 * g) - ((P_satur_vapor_feed)/(rho_F_20 * g) + ((w_liq_real_enter_feed / (2 * g))) + hydraulic_losses_satur_feed + heigth_cavitation_feed))
+    return ((Pa/(rho_F_20 * g) - ((P_satur_vapor_feed)/(rho_F_20 * g) + ((w_liq_real_enter_feed / (2 * g))) + hydraulic_losses_satur_feed + heigth_cavitation_feed)))

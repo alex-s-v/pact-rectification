@@ -234,4 +234,4 @@ def heigth_max_suction(Pa, rho_reflux_20, g, P_satur_vapor_reflux, w_liq_real_en
     ----------
     &&&&
     """
-    return ((Pa/(rho_reflux_20 * g) - ((P_satur_vapor_reflux)/(rho_reflux_20 * g) + ((w_liq_real_enter_reflux / (2 * g))) + hydraulic_losses_satur_reflux + heigth_cavitation_reflux))
+    return ((Pa/(rho_reflux_20 * g) - ((P_satur_vapor_reflux)/(rho_reflux_20 * g) + ((w_liq_real_enter_reflux / (2 * g))) + hydraulic_losses_satur_reflux + heigth_cavitation_reflux)))

@@ -52,7 +52,7 @@ def m_steam_boil(Q_boiler, r_steam):
     Returns
     -------
     m_steam_boil : float
-        The flow rate steam of boiler, [W] [J/s]
+        The flow rate steam of boiler, [kg/s]
     References
     ----------
     Дытнерский, формула 2.3, стр.45
@@ -60,14 +60,14 @@ def m_steam_boil(Q_boiler, r_steam):
     return Q_boiler / r_steam
 
 
-def deltaT_boil(t_w, t_cond_boil):
+def deltaT_boil(tw, t_vapor):
     """
     Calculates the temperature difference of boiler.
     Parameters
     ----------
-    t_w : float
+    tw : float
         The boiling temperature of liquid, [С]
-    t_cond_boil : float
+    t_vapor : float
         The condensation temperature of steam, [C]
     Returns
     -------
@@ -77,7 +77,7 @@ def deltaT_boil(t_w, t_cond_boil):
     ----------
     &&&&&
     """     
-    return t_cond_boil - t_w
+    return t_vapor - tw
 
 
 @unitcheck(Q_boil="W", deltaT_boil="degrees celcium",  Kt_approx_boiler="W/(m**2 * degrees celcium", res_unit="m**2")
@@ -102,6 +102,61 @@ def A_approx_boiler(Q_boiler, deltaT_boil, Kt_approx_boiler):
     """           
     return Q_boiler / (deltaT_boil * Kt_approx_boiler)
 
+
+def A_boiler(rho_cond, r_steam, g, mu_cond, L_tube_boiler, lyambda_cond):
+    """
+    Calculates the coefficent A of boiler.
+    Parameters
+    ----------
+    lyambda_cond : float
+        The thermal conducivity of condensate, [W / (m * degrees celcium)]
+    rho_cond : float
+        The destiny of condensate, [kg / m**3]
+    mu_cond : float
+        The viscosity of condensate, [Pa / s]
+    r_steam : float
+        The vaporazation of vapor, [kg/s]
+    L_tube_boiler : float
+        The tube length of boiler, [m]    
+    Returns
+    -------
+    A_boiler : float
+        The coefficent A of boiler, [dismensionless]
+    References
+    ----------
+    Дытнерский, формула 2.23, стр.53
+    """                  
+    return 1.21 * lyambda_cond * ((rho_cond**2) * r_steam * g / (mu_cond * L_tube_boiler))**(1/3)
+
+
+def B_boiler(rho_W_boil, rho_W_vapor, sigma_W_boil, r_W_boil, Cw_boil, mu_W_boil, lyambda_W_boil):
+    """
+    Calculates the coefficent B of boiler.
+    Parameters
+    ----------
+    lyambda_W_boil : float
+        The thermal conducivity of waste at the boilling temperature, [W / (m * degrees celcium)]
+    rho_W_boil : float
+        The destiny of waste at boilling the temperature, [kg / m**3]
+    rho_W_vapor : float
+        The destiny of vapor at boilling the temperature, [kg / m**3]
+    sigma_W_boil : float
+        The surface tension of waste at the boilling temperature, [N/m]
+    r_W_boil : float
+        The heat vaporazation of waste at the boilling temperature, [N/m]    
+    Cw_boiler : float
+        The heat capacity of waste at the boiling temperature, [J/(kg * degrees C)]
+    mu_W_boiler : float
+        The viscocity of waste at the boiling temperature, [Pa/s]      
+    Returns
+    -------
+    B_boiler : float
+        The coefficent B of boiler, [dismensionless]
+    References
+    ----------
+    Дытнерский, формула 2.28, стр.54
+    """                  
+    return 780 * lyambda_W_boil^(1.3) * rho_W_boil^(0.5) * rho_W_vapor^(0.06) / (sigma_W_boil^(0.5) * r_W_boil^(0.6) * rho_W_vapor^(0.66) * Cw_boil^(0.3) * mu_W_boil^(0.3))
 
 @unitcheck(pollution_1_boiler="m**2 * degrees celcium / W", pollution_2_boiler="m**2 * degrees celcium / W", sigma_boiler="m",  lyambda_wall_boiler="W / (m * degrees celcium)", res_unit="m**2 * degrees celcium / W")
 def sigma_thermpollution_boiler(pollution_1_boiler, pollution_2_boiler, sigma_boiler, lyambda_wall_boiler):
