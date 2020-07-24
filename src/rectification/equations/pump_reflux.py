@@ -1,5 +1,6 @@
 from rectification.utils import unitcheck
 from scipy.constants import g
+import numpy as np
 
 
 
@@ -89,7 +90,7 @@ def lyambda_rubbery_reflux(Re_reflux, e_roughness_reflux, d_enter_reflux_real):
     ----------
     ????? 
     """       
-    return - 2 * log((e_roughness_reflux/d_enter_reflux_real)/3,7 + (6,81/Re_reflux)^0,9)
+    return - 2 * np.log((e_roughness_reflux/d_enter_reflux_real)/3,7 + (6,81/Re_reflux)**0,9)
 
 
 def Re_reflux(w_liq_real_enter_reflux, rho_reflux, d_enter_reflux_real, mu_reflux):
@@ -159,7 +160,7 @@ def N_power_reflux(Q_volume_reflux, rho_reflux_avrg, g, H_hydrohead_reflux_real,
     ----------
     ????? 
     """    
-    return Q_volume_reflux * rho_reflux * g * H_hydrohead_reflux_real / (nu_motor_efficiency * nu_supply_efficiency)
+    return Q_volume_reflux * rho_reflux_avrg * g * H_hydrohead_reflux_real / (nu_motor_efficiency * nu_supply_efficiency)
 
 
 def hydraulic_losses_suct_reflux(dzeta_enter_reflux, dzeta_turn90_reflux, n_turn90_reflux, dzeta_ventil_reflux, n_ventil_reflux, g, w_liq_real_enter_reflux):
@@ -234,4 +235,4 @@ def heigth_max_suction(Pa, rho_reflux_20, g, P_satur_vapor_reflux, w_liq_real_en
     ----------
     &&&&
     """
-    return ((Pa/(rho_reflux_20 * g) - ((P_satur_vapor_reflux)/(rho_reflux_20 * g) + ((w_liq_real_enter_reflux / (2 * g))) + hydraulic_losses_satur_reflux + heigth_cavitation_reflux)))
+    return ((Pa/(rho_reflux_20 * g) - ((P_satur_vapor_reflux)/(rho_reflux_20 * g) + ((w_liq_real_enter_reflux / (2 * g))) + hydraulic_losses_suct_reflux + heigth_cavitation_reflux)))
