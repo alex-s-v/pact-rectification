@@ -1,5 +1,6 @@
 from rectification.utils import unitcheck
 from scipy.constants import g
+import numpy as np
 
 
 
@@ -91,7 +92,7 @@ def lyambda_heatexchanger_feed(Re_feed, e_roughness_heatexchanger_feed, d_inner)
     ----------
     ????? 
     """       
-    return ((- 2 * log((e_roughness/d_inner)/3,7 + (6,81/Re_feed)^0,9))^(-1))^2
+    return ((- 2 * np.log((e_roughness_heatexchanger_feed/d_inner)/3,7 + (6,81/Re_feed)**0,9))**(-1))**2
 
 
 def lyambda_injection_feed(Re_injection_feed, e_roughness_injection_feed, d_enter_feed_real):
@@ -113,7 +114,7 @@ def lyambda_injection_feed(Re_injection_feed, e_roughness_injection_feed, d_ente
     ----------
     ????? 
     """       
-    return - 2 * log((e_roughness/d_enter_feed_real)/3,7 + (6,81/Re_injection_feed)^0,9)
+    return - 2 * np.log((e_roughness_injection_feed/d_enter_feed_real)/3,7 + (6,81/Re_injection_feed)**0,9)
 
 
 def Re_injection_feed(w_liq_real_enter_feed, rho_F_20, d_enter_feed_real, mu_F_20):
@@ -246,7 +247,7 @@ def heigth_max_suction(Pa, rho_F_20, g, P_satur_vapor_feed, w_liq_real_enter_fee
         The  pressure of saturated vapor, [Pa]
     w_liq_real_enter_feed : float
         The speed of suction line , [m/s]
-    hydraulic_losses_suct : float
+    hydraulic_losses_suct_feed : float
         The hydraulic losses of suction line, [m]      
     heigth_cavitation_feed : float
         The losses due to cavitation, [m]  
@@ -258,4 +259,4 @@ def heigth_max_suction(Pa, rho_F_20, g, P_satur_vapor_feed, w_liq_real_enter_fee
     ----------
     &&&&
     """   
-    return ((Pa/(rho_F_20 * g) - ((P_satur_vapor_feed)/(rho_F_20 * g) + ((w_liq_real_enter_feed / (2 * g))) + hydraulic_losses_satur_feed + heigth_cavitation_feed)))
+    return ((Pa/(rho_F_20 * g) - ((P_satur_vapor_feed)/(rho_F_20 * g) + ((w_liq_real_enter_feed / (2 * g))) + hydraulic_losses_suct_feed + heigth_cavitation_feed)))
